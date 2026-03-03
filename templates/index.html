@@ -1,1 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EVA AI Companion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
 
+        #chat-container {
+            width: 400px;
+            max-width: 90%;
+            height: 600px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0,255,255,0.5);
+        }
+
+        #messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+        }
+
+        .user {
+            align-self: flex-end;
+            background: #00ffc6;
+            color: #000;
+            box-shadow: 0 0 10px #00ffc6;
+        }
+
+        .eva {
+            align-self: flex-start;
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 10px #0ff;
+        }
+
+        #input-container {
+            display: flex;
+            padding: 10px;
+            background: rgba(0,0,0,0.8);
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        #send-btn {
+            margin-left: 10px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: none;
+            background: #00ffc6;
+            color: #000;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        #send-btn:hover {
+            background: #00e6b0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00ffc6;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="messages"></div>
+        <div id="input-container">
+            <input type="text" id="user-input" placeholder="Say something to EVA...">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const messages = document.getElementById("messages");
+        const input = document.getElementById("user-input");
+        const sendBtn = document.getElementById("send-btn");
+
+        function addMessage(text, sender) {
+            const msg = document.createElement("div");
+            msg.classList.add("message", sender);
+            msg.innerText = text;
+            messages.appendChild(msg);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        sendBtn.addEventListener("click", async () => {
+            const text = input.value.trim();
+            if (!text) return;
+            addMessage(text, "user");
+            input.value = "";
+
+            // Call Flask backend
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await response.json();
+            addMessage(data.reply, "eva");
+        });
+
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendBtn.click();
+        });
+    </script>
+</body>
+</html>
