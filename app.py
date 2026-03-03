@@ -76,5 +76,8 @@ User says: {user_input}
     save_memory(memory)
     return jsonify({"reply": eva_reply})
 
+import os 
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
